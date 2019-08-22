@@ -2,21 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RegisterRequest;
-use App\Models\Link;
-use App\Models\User;
+use App\Http\Requests\UserRequest;
+use App\Services\AuthService;
 
 class AuthController extends Controller
 {
 
-    public function register(RegisterRequest $request)
+    private $service;
+
+    /**
+     * GameController constructor.
+     * @param AuthService $authService
+     */
+    public function __construct(AuthService $authService)
+    {
+        $this->service = $authService;
+    }
+
+    /**
+     * @param UserRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function register(UserRequest $request)
     {
 
-        $user = User::create($request->all());
+        $link_id = $this->service->createUserAndLink($request->all());
 
-        $link = Link::create(['id' => $this->linkGeneration(), 'user_id' => $user->id]);
-
-        return response()->json(['link' => $link->id]);
+        return response()->json(['link' => $link_id]);
     }
 
 }

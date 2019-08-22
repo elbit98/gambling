@@ -2,106 +2,92 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GameHistory;
 use App\Models\Link;
-use App\Models\User;
+use App\Services\GameService;
 use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
+    private $service;
 
+    /**
+     * GameController constructor.
+     * @param GameService $gameService
+     */
+    public function __construct(GameService $gameService)
+    {
+        $this->service = $gameService;
+    }
+
+    /**
+     * @param Link $link
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index(Link $link)
     {
         return view('game', compact('link'));
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function rate(Request $request)
     {
 
         $rand = rand(1, 1000);
 
-        $notEven = $this->evenOrNotEven($rand);
+        $notEven = $this->service->evenOrNotEven($rand);
 
         $winAmount = 0;
 
         if (!$notEven) {
-            $winAmount = $this->winAmount($rand);
+            $winAmount = $this->service->winAmount($rand);
         }
 
-        $this->saveRate($request->link, $rand, $winAmount);
+        $this->service->saveRate($request->link, $rand, $winAmount);
 
         return response()->json(['lose' => $notEven, 'number' => $rand, 'win' => $winAmount]);
 
     }
 
-    public function saveRate($link, $rand, $amount)
-    {
-
-        $link = Link::find($link);
-
-        $user = User::find($link->user_id);
-
-        GameHistory::create([
-            'user_id' => $user->id,
-            'rand'    => $rand,
-            'amount'  => $amount
-        ]);
-
-    }
-
-    public function winAmount($number)
-    {
-
-        if ($number > 900) return $this->percent($number, 0.70);
-        if ($number > 600) return $this->percent($number, 0.50);
-        if ($number > 300) return $this->percent($number, 0.30);
-        if ($number < 300) return $this->percent($number, 0.10);
-
-    }
-
-    public function evenOrNotEven($number)
-    {
-        return ($number % 2) ? true : false;
-    }
-
-    public function percent($number, $percent)
-    {
-        $number_percent = $number * $percent;
-
-        return round($number_percent, 2);
-    }
-
+    /**
+     * @param Request $request
+     * @return |null
+     */
     public function regenerateLink(Request $request)
     {
 
-        $link = $request->link;
+        $newLink = $this->service->regenerateLink($request->link);
 
-        $link = Link::find($link);
+        if (is_null($newLink)) abort(404);
 
-        if ($link) {
-            $link->update(['id' => $this->linkGeneration()]);
-            return $link->id;
-        }
+        return $newLink;
 
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function history(Request $request)
     {
 
-        $link = $request->link;
-
-        $link = Link::find($link);
-
-        $history = GameHistory::select(['rand', 'amount'])->where('user_id', $link->user_id)->take(3)->orderBy('id', 'desc')->get();
+        $history = $this->service->getHistory($request->link);
 
         return response()->json($history);
 
     }
 
 
+    /**
+     * @param Link $link
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
     public function deactivate(Link $link)
     {
-        if ($link) $link->delete();
+        $link->delete();
 
         return response()->json([]);
     }

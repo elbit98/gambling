@@ -23,17 +23,12 @@ $('#rate').on('click', () => {
 
 $('#btn-copy-link').on('click', () => {
 
-    /* Get the text field */
-    let $copyText = $("#copyLinkValue");
-
-    /* Select the text field */
-    $copyText.select();
-
-    /* Copy the text inside the text field */
+    let $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val($("#copyLinkValue").val()).select();
     document.execCommand("copy");
+    $temp.remove();
 
-    /* Alert the copied text */
-    alert("Copied the text: " + $copyText.val());
 });
 
 

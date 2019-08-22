@@ -25,3 +25,12 @@ Route::post('regenerate-link', 'GameController@regenerateLink');
 
 Route::post('history', 'GameController@history');
 
+Route::get('admin/login', 'Admin\AdminController@login')
+    ->name('admin.login');
+
+Route::post('admin/handlerLogin', 'Admin\AdminController@handlerLogin')
+    ->name('admin.handlerLogin');
+
+Route::group(['middleware' => 'admin', 'prefix' => 'admin'], function () {
+    Route::resource('users', 'Admin\UserController', ['as' => 'admin']);
+});
