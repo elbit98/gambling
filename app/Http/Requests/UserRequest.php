@@ -24,7 +24,8 @@ class UserRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name'  => 'required',
+            'phone' => 'required|regex:/(01)[0-9]{9}/'
         ];
     }
 }

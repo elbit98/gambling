@@ -1,5 +1,7 @@
 @extends('layouts.main')
 
+@section('title', 'Edit User')
+
 @section('body')
     <div class="container">
         <div class="card-header">

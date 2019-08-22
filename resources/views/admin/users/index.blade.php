@@ -1,7 +1,15 @@
 @extends('layouts.main')
 
+@section('title', 'Users')
+
 @section('body')
     <div class="container">
+
+
+        <div>
+            <a href="{{ route('admin.users.create')}}" class="btn btn-primary">Create</a>
+        </div>
+
         @if(session()->get('success'))
             <div class="alert alert-success">
                 {{ session()->get('success') }}

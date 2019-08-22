@@ -41,7 +41,7 @@ class UserController extends Controller
     {
         User::create(['name' => $request->name, 'phone' => $request->phone]);
 
-        return redirect()->route('admin.users.index')->with('success', 'Stock has been added');
+        return redirect()->route('admin.users.index')->with('success', 'User has been added');
     }
 
     /**
